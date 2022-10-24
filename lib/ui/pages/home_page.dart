@@ -47,11 +47,17 @@ class HomePage extends StatelessWidget implements HomeView {
     List<ToDo> todoList = [];
     todoList.add(ToDo('task', 'note', 'time', true));
     todoList.add(ToDo('task', 'note', 'time', false));
+    DateTime today = DateTime.now();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Date'),
+          Text('Date: ${today.day}-${today.month}-${today.year}', style: TextStyle(
+            fontSize: 20,
+          ),),
+          SizedBox(height: 16,),
           HomeListViewWidget(
             todoList: todoList//vm.todoAPIState.data as List<ToDo>,
           ),
@@ -62,7 +68,7 @@ class HomePage extends StatelessWidget implements HomeView {
 
   @override
   void goToNewTaskPage(BuildContext context) {
-    RouteManager.goTo(context, NewTaskPage());
+    RouteManager.goTo(context, NewTaskPage(isEdit: false,));
   }
 
   @override

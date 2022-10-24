@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:to_do/res/styles.dart';
 
 class NewTaskPage extends StatefulWidget {
+  bool isEdit;
+  NewTaskPage({super.key, required this.isEdit});
+
   @override
   State<StatefulWidget> createState() => _NewTaskPageState();
 }
@@ -54,16 +57,21 @@ class _NewTaskPageState extends State<NewTaskPage> {
                 height: 32,
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('${selectedTime.hour}:${selectedTime.minute}'),
+                  Text('Time: ${selectedTime.hour}:${selectedTime.minute}'),
                   IconButton(
                     onPressed: () {
                       selectTimeFromTimePicker(context);
                     },
                     icon: Icon(Icons.access_time),
-                    iconSize: 20,
+                    iconSize: 30,
                   ),
                 ],
+              ),
+              SizedBox(
+                height: 32,
               ),
               Container(
                 alignment: Alignment.bottomCenter,
