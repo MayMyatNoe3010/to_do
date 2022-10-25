@@ -32,3 +32,48 @@ class ToDoTaskProvider extends BasePresenter implements Home{
 
 
 }
+/*
+Future<void> readData() async {
+
+    // Please replace the Database URL
+    // which we will get in “Add Realtime Database”
+    // step with DatabaseURL
+
+    var url = "DatabaseURL"+"data.json";
+    // Do not remove “data.json”,keep it as it is
+    try {
+      final response = await http.get(Uri.parse(url));
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      if (extractedData == null) {
+        return;
+      }
+      extractedData.forEach((blogId, blogData) {
+        list.add(blogData["title"]);
+      });
+      setState(() {
+        isLoading = false;
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  void writeData() async {
+    _form.currentState.save();
+
+    // Please replace the Database URL
+    // which we will get in “Add Realtime
+    // Database” step with DatabaseURL
+    var url = "https://console.firebase.google.com/u/0/project/todoflutter-58e74"+"data.json";
+
+    // (Do not remove “data.json”,keep it as it is)
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: json.encode({"title": title}),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+ */

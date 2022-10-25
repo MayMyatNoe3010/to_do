@@ -45,8 +45,8 @@ class HomePage extends StatelessWidget implements HomeView {
 
   getHomeWidget(ToDoTaskProvider vm) {
     List<ToDo> todoList = [];
-    todoList.add(ToDo('task', 'note', 'time', true));
-    todoList.add(ToDo('task', 'note', 'time', false));
+    todoList.add(ToDo(task: 'task', note: 'note', time: 'time', isComplete: true));
+    todoList.add(ToDo(task: 'task', note: 'note', time: 'time', isComplete: false));
     DateTime today = DateTime.now();
     return Padding(
       padding: const EdgeInsets.all(8.0),
