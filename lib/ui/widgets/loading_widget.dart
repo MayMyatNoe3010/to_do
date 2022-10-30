@@ -10,15 +10,17 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(msg),
-        SizedBox(
-          height: 16,
-        ),
-        const CupertinoActivityIndicator(),
-      ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(msg),
+          SizedBox(
+            height: 16,
+          ),
+          const CupertinoActivityIndicator(),
+        ],
+      ),
     );
   }
 }

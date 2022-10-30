@@ -1,4 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:to_do/domain/model/to_do.dart';
+import 'package:to_do/domain/network/api_response.dart';
+import 'package:to_do/domain/network/api_service.dart';
 import 'package:to_do/main.dart';
 import 'package:to_do/provider/base/api_state_wrapper.dart';
 import 'package:to_do/provider/base/base_presenter.dart';
@@ -7,15 +12,33 @@ import '../domain/use_case/home_use_case.dart';
 
 class ToDoTaskProvider extends BasePresenter implements Home{
   APIStateWrapper todoAPIState = APIStateWrapper(apiState: APIState.idle, data:  null, message: '');
+  APIStateWrapper addToDoAPIState = APIStateWrapper(apiState: APIState.idle, data: null, message: '');
+  int currentId = 0;
+  bool isFirstCall = true;
   @override
   deliverProvider() {
     return super.makeProvider(this);
   }
 
   @override
-  addToDo() {
-    // TODO: implement addToDo
-    throw UnimplementedError();
+  addToDo(ToDo toDo) async{
+    isFirstCall = false;
+    addToDoAPIState.apiState = APIState.loading;
+    addToDoAPIState.message  = 'Loading';
+    notifyListeners();
+    toDo.id = increaseId();
+    log('ToDoID', name: toDo.id.toString());
+    var value = await APIService.addToDo(toDo);
+    if(value is Success){
+      log('ValueAdd', name: value.response.toString());
+      print(value.response.toString());
+      addToDoAPIState.apiState = APIState.success;
+      addToDoAPIState.message = 'Success';
+    }else{
+      addToDoAPIState.apiState = APIState.error;
+      addToDoAPIState.message = 'Error';
+    }
+    notifyListeners();
   }
 
   @override
@@ -25,55 +48,38 @@ class ToDoTaskProvider extends BasePresenter implements Home{
   }
 
   @override
-  getToDoList() {
-    // TODO: implement getToDoList
-    throw UnimplementedError();
+  getToDoList() async{
+    todoAPIState.apiState = APIState.loading;
+    todoAPIState.message = 'Loading';
+    notifyListeners();
+    var value = await APIService.getTodoList();
+    if(value is Success){
+
+      ToDoResponse toDoResponse = value.response as ToDoResponse;
+      todoAPIState.apiState = APIState.success;
+      todoAPIState.data = toDoResponse.todoList;
+      todoAPIState.message = 'Success';
+      currentId = (toDoResponse.todoList.isNotEmpty)? toDoResponse.todoList.last.id : 0;
+      notifyListeners();
+
+    }else{
+      todoAPIState.apiState = APIState.error;
+      todoAPIState.message = 'Error';
+    }
+    notifyListeners();
+  }
+
+  int increaseId(){
+    int increasedID = currentId+1;
+    log('Current Increase', name: '$increasedID');
+    return increasedID;
+  }
+
+  setDefaultAddAPIState(){
+    addToDoAPIState.apiState = APIState.idle;
+    isFirstCall = true;
+    notifyListeners();
   }
 
 
 }
-/*
-Future<void> readData() async {
-
-    // Please replace the Database URL
-    // which we will get in “Add Realtime Database”
-    // step with DatabaseURL
-
-    var url = "DatabaseURL"+"data.json";
-    // Do not remove “data.json”,keep it as it is
-    try {
-      final response = await http.get(Uri.parse(url));
-      final extractedData = json.decode(response.body) as Map<String, dynamic>;
-      if (extractedData == null) {
-        return;
-      }
-      extractedData.forEach((blogId, blogData) {
-        list.add(blogData["title"]);
-      });
-      setState(() {
-        isLoading = false;
-      });
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  void writeData() async {
-    _form.currentState.save();
-
-    // Please replace the Database URL
-    // which we will get in “Add Realtime
-    // Database” step with DatabaseURL
-    var url = "https://console.firebase.google.com/u/0/project/todoflutter-58e74"+"data.json";
-
-    // (Do not remove “data.json”,keep it as it is)
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        body: json.encode({"title": title}),
-      );
-    } catch (error) {
-      throw error;
-    }
-  }
- */

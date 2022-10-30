@@ -1,10 +1,21 @@
+import 'dart:developer';
+
 class ToDoResponse{
   List<ToDo> todoList = [];
-  ToDoResponse.fromJson(List<dynamic> json){
-    for (var element in json) {json.add(ToDo.fromJson(element));}
+  ToDoResponse.fromJson(Map<String, dynamic> json){
+    //for (var element in json) {todoList.add(ToDo.fromJson(element));}
+    if(json != null){
+      json.forEach((key, value) {
+        todoList.add(ToDo.fromJson(value));
+      });
+      log('Todo Length', name: todoList.length.toString());
+    }
+
+
   }
 }
 class ToDo{
+  late int id;
   late String task;
   String? note;
   String? time;
@@ -14,6 +25,7 @@ class ToDo{
 
   Map<String, dynamic> toJson(){
     final Map<String,dynamic> data = <String,dynamic>{};
+    data['id'] = id;
     data['task'] = task;
     data['note'] = note;
     data['time'] = time;
@@ -22,7 +34,7 @@ class ToDo{
   }
 
   ToDo.fromJson(Map<String, dynamic>json){
-
+    id = json['id'];
     task = json['task'];
     note = json['note'];
     time = json['time'];
