@@ -14,40 +14,28 @@ import 'package:to_do/ui/widgets/loading_widget.dart';
 
 import '../widgets/error_widget.dart';
 
-class NewTaskPage extends StatefulWidget implements NewTaskView{
+class NewTaskPage extends StatefulWidget{
 
   const NewTaskPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _NewTaskPageState();
 
-  @override
-  goBackToHomePage(BuildContext context) {
-    Future.delayed(Duration.zero,(){
-      RouteManager.goToAndRemoveBackStack(context, HomePage());
-    });
-  }
-
-  @override
-  showLoading(BuildContext context) {
-    return LoadingWidget(msg: 'Loading');
-  }
-
-  @override
-  showError(BuildContext context, String msg) {
-    return ErrorsWidget(msg: msg);
-  }
 }
 
-class _NewTaskPageState extends State<NewTaskPage> {
+class _NewTaskPageState extends State<NewTaskPage> implements NewTaskView {
   final TextEditingController tecTask = TextEditingController();
   final TextEditingController tecNote = TextEditingController();
   TimeOfDay selectedTime = TimeOfDay.now();
 
   @override
   Widget build(BuildContext context) {
+
     ToDoTaskProvider provider = getProvider<ToDoTaskProvider>(context);
-    provider.setDefaultAddAPIState();
+    Future.delayed(Duration.zero,(){
+      provider.setDefaultAddAPIState();
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text('To Do'),
@@ -141,13 +129,39 @@ class _NewTaskPageState extends State<NewTaskPage> {
   }
 
   getConsumer(BuildContext context) {
-    return Consumer<ToDoTaskProvider>(builder: (context, vm, child){
-       switch(vm.addToDoAPIState.apiState){
-         case APIState.success : return const NewTaskPage().goBackToHomePage(context);
-         case APIState.loading : return NewTaskPage().showLoading(context);
-         case APIState.error : return NewTaskPage().showError(context, vm.addToDoAPIState.message);
-         default: return _getNewTaskPageWidget(context, vm);
-       }
+    return Stack(
+      children:[ Consumer<ToDoTaskProvider>(builder: (context, vm, child){
+        log('AddToDoAPI',name: '${vm.addToDoAPIState.apiState}');
+         switch(vm.addToDoAPIState.apiState){
+           case APIState.idle : return _getNewTaskPageWidget(context, vm);
+           case APIState.success : vm.getToDoList();
+             return goBackToHomePage(context);
+           case APIState.loading : return showLoading(context);
+           case APIState.error : return showError(context, vm.addToDoAPIState.message);
+           default: return Container();
+         }
+      }),
+
+      ]
+    );
+  }
+
+
+  @override
+  goBackToHomePage(BuildContext context) {
+    Future.delayed(Duration.zero,(){
+
+      RouteManager.goToAndRemoveBackStack(context, HomePage());
     });
+  }
+
+  @override
+  showLoading(BuildContext context) {
+    return LoadingWidget(msg: 'Loading');
+  }
+
+  @override
+  showError(BuildContext context, String msg) {
+    return ErrorsWidget(msg: msg);
   }
 }

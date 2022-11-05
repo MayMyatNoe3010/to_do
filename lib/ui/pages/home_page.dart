@@ -45,20 +45,21 @@ class HomePage extends StatelessWidget implements HomeView {
     return Consumer<ToDoTaskProvider>(builder: (context, vm, child) {
       log('APIStaate', name: '${vm.todoAPIState.apiState}');
       switch (vm.todoAPIState.apiState) {
-        // case APIState.idle:
-        //   return getHomeWidget(vm);
+        case APIState.success:
+          return getHomeWidget(vm);
         case APIState.loading:
           return showLoading(context);
         case APIState.error:
           return showError(context);
         default:
-          return getHomeWidget(vm);
+          return Container();
       }
     });
   }
 
   getHomeWidget(ToDoTaskProvider vm) {
     List<ToDo> todoList = vm.todoAPIState.data as List<ToDo>;
+
 
     DateTime today = DateTime.now();
     return Padding(
@@ -78,12 +79,12 @@ class HomePage extends StatelessWidget implements HomeView {
           ),
           ListView.builder(
               shrinkWrap: true,
-              itemCount: todoList.length,
+              itemCount: (todoList != null)?todoList.length : 0,
               itemBuilder: (BuildContext context, int index) {
                 ToDo todo = todoList[index];
                 return InkWell(child: HomeListItemWidget(todo: todo),
                 onTap: (){
-                  editTask(context);
+                  editTask(context, todo);
                 },);
               })
         ],
@@ -109,7 +110,8 @@ class HomePage extends StatelessWidget implements HomeView {
   }
 
   @override
-  void editTask(BuildContext context) {
-    // TODO: implement editTask
+  void editTask(BuildContext context,ToDo toDo) {
+    toDo.isComplete = true;
+    getProvider<ToDoTaskProvider>(context).editToDo(toDo);
   }
 }

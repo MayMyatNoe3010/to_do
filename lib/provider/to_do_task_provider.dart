@@ -9,6 +9,7 @@ import 'package:to_do/provider/base/api_state_wrapper.dart';
 import 'package:to_do/provider/base/base_presenter.dart';
 
 import '../domain/use_case/home_use_case.dart';
+import '../utils/utils.dart';
 
 class ToDoTaskProvider extends BasePresenter implements Home{
   APIStateWrapper todoAPIState = APIStateWrapper(apiState: APIState.idle, data:  null, message: '');
@@ -27,24 +28,38 @@ class ToDoTaskProvider extends BasePresenter implements Home{
     addToDoAPIState.message  = 'Loading';
     notifyListeners();
     toDo.id = increaseId();
+    toDo.date = DateTime.now().toString();
     log('ToDoID', name: toDo.id.toString());
     var value = await APIService.addToDo(toDo);
     if(value is Success){
       log('ValueAdd', name: value.response.toString());
-      print(value.response.toString());
+
+
       addToDoAPIState.apiState = APIState.success;
       addToDoAPIState.message = 'Success';
     }else{
       addToDoAPIState.apiState = APIState.error;
       addToDoAPIState.message = 'Error';
     }
+
     notifyListeners();
   }
 
   @override
-  editToDo() {
-    // TODO: implement editToDo
-    throw UnimplementedError();
+  editToDo(ToDo toDo) async{
+    todoAPIState.apiState = APIState.loading;
+    todoAPIState.message = 'Loading';
+    notifyListeners();
+    var value = await APIService.editToDo(toDo);
+    if(value is Success){
+      log('ValueEdit', name: value.response.toString());
+      todoAPIState.apiState = APIState.success;
+      todoAPIState.message = 'Success';
+    }else{
+      todoAPIState.apiState = APIState.error;
+      todoAPIState.message = 'Error';
+    }
+    notifyListeners();
   }
 
   @override
@@ -56,11 +71,17 @@ class ToDoTaskProvider extends BasePresenter implements Home{
     if(value is Success){
 
       ToDoResponse toDoResponse = value.response as ToDoResponse;
+      (toDoResponse.todoList as List<ToDo>).forEach((element) {
+        log('DifferenceDate',name: differenceDate(element.date as String).toString());
+        if(differenceDate(element.date as String) >= 1){
+          deleteToDo(element.todoKey as String);
+        }
+      });
       todoAPIState.apiState = APIState.success;
       todoAPIState.data = toDoResponse.todoList;
       todoAPIState.message = 'Success';
-      currentId = (toDoResponse.todoList.isNotEmpty)? toDoResponse.todoList.last.id : 0;
-      notifyListeners();
+
+      currentId = (toDoResponse.todoList.isNotEmpty)? toDoResponse.todoList.length : 0;
 
     }else{
       todoAPIState.apiState = APIState.error;
@@ -70,16 +91,31 @@ class ToDoTaskProvider extends BasePresenter implements Home{
   }
 
   int increaseId(){
-    int increasedID = currentId+1;
-    log('Current Increase', name: '$increasedID');
-    return increasedID;
+    return increaseID(currentId);
   }
 
   setDefaultAddAPIState(){
     addToDoAPIState.apiState = APIState.idle;
-    isFirstCall = true;
     notifyListeners();
   }
+
+  @override
+  deleteToDo(String key) async{
+    todoAPIState.apiState = APIState.loading;
+    notifyListeners();
+    var value = await APIService.deleteToDo(key);
+    if(value is Success){
+      log('ValueDelete', name: value.response.toString());
+      todoAPIState.apiState = APIState.success;
+      todoAPIState.message = 'Success';
+    }else{
+      todoAPIState.apiState = APIState.error;
+      todoAPIState.message = 'Error';
+    }
+    notifyListeners();
+  }
+
+
 
 
 }
